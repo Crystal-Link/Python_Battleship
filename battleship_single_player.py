@@ -146,7 +146,7 @@ class Missiles():
 		self.enemyBoard = enemy_board
 		self.enemyShips = enemy_ships
 		if (user == "Enemy"):
-			self.notattacked = list(range(0,enemy_board.size * enemy_board.size - 1)) # array to keep track of what cells are not hit yet
+			self.notattacked = list(range(0,enemy_board.size * enemy_board.size)) # array to keep track of what cells are not hit yet
 	
 	def attack_ui(self, window, enemyMissiles, turn):
 		if (self.user == "Player"):
@@ -166,7 +166,7 @@ class Missiles():
 					self.btn[row][col].grid(row = row, column = col, sticky = "ew")
 			root.mainloop()
 		elif (self.user == "Enemy"):
-			pass	
+			pass
 	
 	def fire_missile(self, row, col, index, window, enemyBoard, enemyShips, enemyMissiles, turn):
 		start_xpos = enemyBoard.start_xpos
@@ -178,6 +178,7 @@ class Missiles():
 				pygame.draw.circle(window, (255,0,0), ((start_xpos + cellSize * (index % size)) + cellSize//2, (start_ypos + cellSize * (index // size)) + cellSize//2), cellSize//2, 0)
 				enemyShips.selected.remove(index)
 				self.btn[row][col].config(bg ='#FF0000', state = tk.DISABLED)
+				self.check_win_condition(window)
 			else:
 				pygame.draw.circle(window, (0,0,0), ((start_xpos + cellSize * (index % size)) + cellSize//2, (start_ypos + cellSize * (index // size)) + cellSize//2), cellSize//2, 0)
 				self.btn[row][col].config(bg='#000000', state = tk.DISABLED)
@@ -188,13 +189,46 @@ class Missiles():
 				pygame.draw.circle(window, (255,0,0), ((start_xpos + cellSize * (index % size)) + cellSize//2, (start_ypos + cellSize * (index // size)) + cellSize//2), cellSize//2, 0)
 				enemyShips.selected.remove(index)
 				self.fire_missile(row, col, index, window, enemyBoard, enemyShips, self, turn)
+				enemyMissiles.check_win_condition(window)
 			else:
 				pygame.draw.circle(window, (0,0,0), ((start_xpos + cellSize * (index % size)) + cellSize//2, (start_ypos + cellSize * (index // size)) + cellSize//2), cellSize//2, 0)
 			self.notattacked.remove(index)
-		
 		pygame.display.update()
 	
-
+	def check_win_condition(self, window):
+		if (self.user == "Player"):
+			if not self.ships.selected:
+				font = pygame.font.SysFont(None, 80)
+				text = font.render("You Lose...",5,(0,0,255))
+				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
+				pygame.display.update()
+				self.disable_all_buttons()
+			elif not self.enemyShips.selected:
+				font = pygame.font.SysFont(None, 80)
+				text = font.render("You Win!!",5,(0,255,0))
+				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
+				pygame.display.update()
+				self.disable_all_buttons()
+#		elif (self.user == "Enemy"):
+#			if not self.ships.selected:
+#				font = pygame.font.SysFont(None, 60)
+#				text = font.render("You Win!!",5,(0,0,255))
+#				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
+#				pygame.display.update()
+#				self.disable_all_buttons()
+#			elif not self.enemyShips.selected:
+#				font = pygame.font.SysFont(None, 50)
+#				text = font.render("You Lose...",5,(255,0,0))
+#				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
+#				pygame.display.update()
+#				self.disable_all_buttons()
+	
+	def disable_all_buttons(self):
+		size = self.enemyBoard.size
+		for row in range(size):
+				for col in range(size):
+					self.btn[row][col].config(state = tk.DISABLED) 
+	
 if __name__ == "__main__":
 	# Initialize program
 	pygame.init()

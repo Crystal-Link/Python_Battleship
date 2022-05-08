@@ -43,3 +43,8 @@ The next step, now that both sides are able to generate their ships, is to allow
 ###### Note: The enemy ships are still displayed for testing purposes.
 
 Once the CPU hit a ship, it is only logical to check the cells around it and attack until it misses, where then it should check the other direction until the ship is destroyed. For now, the CPU only attacks randomly. This will be implemented at a later step.
+
+### 5. Win Condition!
+The final step for the base game would be to check for the win condition. This means, once either side's ships are all destroyed, the game ends and the player either wins or loses. To do this, I created a `check_win_condition` function which will get called after every successful hit. It checks if there are any remaining indices left inside both user's `selected` array (a.k.a. if there are any ship cells still alive). If either user's `selected` array is empty, then all of their ships have been destroyed and the opponent is declared the winner. A text that would either be "You Lose..." or "You Win!" is rendered and is displayed on the game window and all of the Tkinter buttons will be disabled. The game now looks like this:
+
+![initial_win_lose.gif](./Images/initial_win_lose.gif)
