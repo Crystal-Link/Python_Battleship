@@ -109,14 +109,14 @@ class Ships():
 #				index = tempSelected[0]
 #				for i in range(5):
 #					if (index + i) in tempSelected: # check if ship of size x exists horizontally
-#						hcount = hcount + 1
+#						hcount += 1
 #						htemp.append(index + i)
 #						print (htemp)
 #					else:
 #						break
 #				for i in range(5):
 #					if (index + i*self.board.size) in tempSelected: # check if ship of size x exists vertically
-#						vcount = vcount + 1
+#						vcount += 1
 #						vtemp.append(index + i*self.board.size)
 #					else:
 #						break
@@ -210,6 +210,8 @@ class Missiles():
 		self.enemyShips = enemy_ships
 		if (user == "Enemy"):
 			self.notattacked = list(range(0,enemy_board.size * enemy_board.size)) # array to keep track of what cells are not hit yet
+			self.lasthit = [-1, False] # Keep track of the last attack
+			self.checkDir = [0, 1, 2, 3] # 0 = up, 1 = down, 2 = left, 3 = right
 	
 	def attack_ui(self, window, enemyMissiles, turn):
 		if (self.user == "Player"):
@@ -247,9 +249,11 @@ class Missiles():
 				self.btn[row][col].config(bg='#000000', state = tk.DISABLED)
 				enemyMissiles.fire_missile(row, col, index, window, self.board, self.ships, self, 1)
 		elif (self.user == "Enemy" and turn == 1): # CPU attack
-			index = random.choice(self.notattacked)
+			index = random.choice(self.notattacked) # Random Attack
 			if (index in enemyShips.selected):
 				pygame.draw.circle(window, (255,0,0), ((start_xpos + cellSize * (index % size)) + cellSize//2, (start_ypos + cellSize * (index // size)) + cellSize//2), cellSize//2, 0)
+				self.lasthit = [index, True]
+				self.checkDir = [0, 1, 2, 3]
 				enemyShips.selected.remove(index)
 				self.fire_missile(row, col, index, window, enemyBoard, enemyShips, self, turn)
 				enemyMissiles.check_win_condition(window)
@@ -336,7 +340,7 @@ if __name__ == "__main__":
 	playerBoard.draw_board(DISPLAYSURFACE, BLACK, BLUE)
 	enemyBoard.draw_board(DISPLAYSURFACE, BLACK, BLUE)
 	playerShip.draw_ships(DISPLAYSURFACE, BLACK)
-	enemyShip.draw_ships(DISPLAYSURFACE, BLACK)
+#	enemyShip.draw_ships(DISPLAYSURFACE, BLACK)
 	if (turn == 1):
 		enemyMissiles.fire_missile(0, 0, 0, DISPLAYSURFACE, playerBoard, playerShip, playerMissiles, turn)
 		turn = 0

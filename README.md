@@ -13,6 +13,9 @@ This is the Battleship game built using Python. A GUI is implemented through the
 4. Game ends when all of a player's ships have been destroyed.
 5. Implement a multiplayer version that allows players to play against each other rather than against the CPU.
 
+## Video Demo
+A quick demo of the base game can be found [here](https://youtu.be/tUbF7VPHI1A)
+
 ## Steps
 ### 1. Generating the GUI in PyGame
 The first step was to figure out how to use the PyGame package and its modules to generate a GUI and draw the battleship boards onto it. Since this was my first time using PyGame, I was not familiar with how it works and have to look into the package's documentations as well as look for some video tutorials showcasing it. 
@@ -59,3 +62,15 @@ The next test was to follow the enemy ship generation method from step 3 above. 
 In the end, to save time, I decided to use a different approach for ship placement. Since players typically try to randomize the way they place their ships, I will disable the whole grid of buttons and create one new button called "Randomize." Essentially, I will borrow the enemy ships generation method I wrote earlier and apply that for the player's ships too. The player will be able to randomize their ship placement as many times as they want until they get a layout that they like. This method ensures that the ship placement is valid while still giving the player some freedom in their ship placement:
 
 ![random_ship_placement.gif](./Images/random_ship_placement.gif)
+
+### 7. Improve CPU Attack Mechanic -- ***POSTPONED***
+The only thing left to comeplete this single-player Battleship game would be to improve the CPU's attack mechanic. As mentioned earlier, as of right now, the CPU always fires missiles randomly. Logically, once it lands a hit, it should check the surrounding cells for connected ship cells. Only once the ship is destroyed should it try to find another one randomly.
+
+On second thought, the aforementioned idea would be flawed with my setup and there will be a lot of extra steps required to make it work. Since I am using indices for random selection AND cell checking, the CPU has no way of knowing whether it is at an edge (or near an edge), making it easy for the next attempted hit/series of hits to be out of bounds or wrapped around to the next/previous row on the board. While this is a slightly better method to playing Battleship, it is still not optimal.
+
+After doing a quick search, I came across two key videos, one talking about the methods behind playing Battleship ([The Battleship Algorithm by Vsauce2](https://www.youtube.com/watch?v=LbALFZoRrw8)) and the other about implementing these methods ([Demolishing Battleship Board Game Using Probability - Building a AI in Python by Challenging Luck](https://www.youtube.com/watch?v=aCj8Ajc1yUU)). They suggest an algorithm which builds a board of probabilities based on where ships can be placed. Based the on hits/misses already performed, it determines where ships of all sizes can be places. Areas of less misses would have a higher probability of containing a ship as opposed to areas where there are already tons of misses. For more details, I suggest watching the two short videos linked above.
+
+###### NOTE: Due to time-constraints, I have decided to POSTPONE this step for the time being.
+
+### 8. Playing Against Real People! (Multiplayer) -- ***POSTPONED***
+I originally wanted to implement a Client-Server network that would run a local server and allow users to join rooms where they can play, but due to time-constraints, I have decided to POSTPONE this step for the time being.
