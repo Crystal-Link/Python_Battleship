@@ -3,6 +3,10 @@ from pygame.locals import *
 import numpy as np
 import tkinter as tk
 import random
+import ctypes
+
+def Mbox(title, text, style):
+    return ctypes.windll.user32.MessageBoxW(0, text, title, style)
 
 class Board():
 	def __init__(self,user):
@@ -64,7 +68,7 @@ class Ships():
 	def __init__(self, user, board):
 		self.user = user
 		self.selected = [] # array to keep track of which cells are selected to be ships
-		self.available = ['2', '3', '3', '4', '5']
+		self.available = [2, 3, 3, 4, 5]
 		self.board = board
 	
 	def ship_setup(self):
@@ -76,27 +80,84 @@ class Ships():
 			frame = tk.Frame(root)
 			frame.grid(row = 0, column = 0)
 			frame['borderwidth'] = 15
-			label = tk.Label(root, text = "Ship Lengths Left: " + ' '.join(str(s) for s in self.available), fg = 'red')
-			
+			randomBtn = tk.Button(root, text = "Randomize", command = lambda s = size: self.randomize_ships(size))
 			self.btn = [[0 for x in range(size)] for x in range(size)]
 			for row in range(size):
 				for col in range(size):
 					index = row * size + col
-					self.btn[row][col] = tk.Button(frame, text = index,  command = lambda x=row, y=col, i = index: self.set_ship(x,y,i))
+#					self.btn[row][col] = tk.Button(frame, text = index, command = lambda x=row, y=col, i = index: self.set_ship(x,y,i))
+					self.btn[row][col] = tk.Button(frame, text = index, state = tk.DISABLED)
 					self.btn[row][col].grid(row = row, column = col, sticky = "ew")
-			label.grid()
+			randomBtn.grid()
+			self.randomize_ships(size)
 			root.mainloop()
+#			self.check_ship_placement()
 		elif (self.user == "Enemy"):
 			self.cpu_ships(size)
-		
-	def set_ship(self,row,col,index):
-		if (self.btn[row][col].cget('bg') == 'SystemButtonFace'):
-			self.btn[row][col].config(bg ='#008000')
-			self.selected.append(index)
-		elif (self.btn[row][col].cget('bg') == '#008000'):
-			self.btn[row][col].config(bg ='SystemButtonFace')
-			self.selected.remove(index)
-			
+
+#==================================================
+# Failed attempt to check for valid ship placement
+#==================================================
+#	def check_ship_placement(self):
+#		tempSelected = list(np.sort(self.selected))	
+#		for x in reversed(self.available):
+#			if tempSelected:
+#				hcount = 0
+#				vcount = 0
+#				htemp = []
+#				vtemp = []
+#				index = tempSelected[0]
+#				for i in range(5):
+#					if (index + i) in tempSelected: # check if ship of size x exists horizontally
+#						hcount = hcount + 1
+#						htemp.append(index + i)
+#						print (htemp)
+#					else:
+#						break
+#				for i in range(5):
+#					if (index + i*self.board.size) in tempSelected: # check if ship of size x exists vertically
+#						vcount = vcount + 1
+#						vtemp.append(index + i*self.board.size)
+#					else:
+#						break
+#				if (hcount == x):
+#					self.available.remove(x)
+#					for j in htemp:
+#						tempSelected.remove(j)
+#				elif (vcount == x):
+#					self.available.remove(x)
+#					for j in vtemp:
+#						tempSelected.remove(j)		
+#
+#		if (len(self.selected) != 17):
+#		if self.available:
+#			Mbox("Invalid Ship Placement", "There should be 5 ships of lengths 2, 3, 3, 4, and 5, placed on the board. Try again.", 0)
+#			self.selected = []
+#			self.available = [2, 3, 3, 4, 5]
+#			self.ship_setup()
+
+
+#============================================================
+# No longer required, since ship placement is now randomzied
+#============================================================
+#	def set_ship(self,row,col,index):
+#		if (self.btn[row][col].cget('bg') == 'SystemButtonFace'):
+#			self.btn[row][col].config(bg ='#008000')
+#			self.selected.append(index)
+#		elif (self.btn[row][col].cget('bg') == '#008000'):
+#			self.btn[row][col].config(bg ='SystemButtonFace')
+#			self.selected.remove(index)
+	
+	def randomize_ships(self, size):
+		self.cpu_ships(size)
+		for row in range(size):
+				for col in range(size):
+					index = row * size + col
+					if (index in self.selected):
+						self.btn[row][col].config(bg ='#000000')
+					else:
+						self.btn[row][col].config(bg ='SystemButtonFace')
+	
 	def draw_ships(self, window, color):
 		start_xpos = self.board.start_xpos
 		start_ypos = self.board.start_ypos
@@ -108,33 +169,35 @@ class Ships():
 		pygame.display.update()
 
 	def cpu_ships(self, size):
+		self.selected = []
+		self.available = [2, 3, 3, 4, 5]
 		while self.available:
 			for x in self.available:
 				overlap = False
 				orientation = random.randint(0,1) # 0 for horizontal, 1 for vertical
 				if (orientation == 0):
 					row = random.randint(0,(size-1))
-					col = random.randint(0,(size-1)-int(x))
+					col = random.randint(0,(size-x))
 					index = row * size + col
-					for i in range(int(x)):
+					for i in range(x):
 						if (index + i) in self.selected: # check if ship overlaps
 							overlap = True
 							break
 					if (overlap):
 						continue
-					for i in range(int(x)):
+					for i in range(x):
 						self.selected.append(index + i)
 				else:
-					row = random.randint(0,(size-1)-int(x))
+					row = random.randint(0,(size-x))
 					col = random.randint(0,(size-1))
 					index = row * size + col
-					for i in range(int(x)):
+					for i in range(x):
 						if (index + i*size) in self.selected:
 							overlap = True
 							break
 					if (overlap):
 						continue	
-					for i in range(int(x)):
+					for i in range(x):
 						self.selected.append(index + i*size)
 				self.available.remove(x)
 
@@ -203,12 +266,17 @@ class Missiles():
 				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
 				pygame.display.update()
 				self.disable_all_buttons()
+				Mbox("Game Over", "Game over, you LOST! Close the button window to exit the game.", 0)
 			elif not self.enemyShips.selected:
 				font = pygame.font.SysFont(None, 80)
 				text = font.render("You Win!!",5,(0,255,0))
 				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
 				pygame.display.update()
 				self.disable_all_buttons()
+				Mbox("Game Over", "Congrats, you WIN! Close the button window to exit the game.", 0)
+#================================
+# Ended up being unnecessary
+#================================
 #		elif (self.user == "Enemy"):
 #			if not self.ships.selected:
 #				font = pygame.font.SysFont(None, 60)
@@ -216,12 +284,14 @@ class Missiles():
 #				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
 #				pygame.display.update()
 #				self.disable_all_buttons()
+#				Mbox("Game Over", "Congrats, you WIN! Close the button window to exit the game.", 0)
 #			elif not self.enemyShips.selected:
 #				font = pygame.font.SysFont(None, 50)
 #				text = font.render("You Lose...",5,(255,0,0))
 #				window.blit(text,((window.get_width()/2)-(text.get_width()/2),(window.get_height()/2)-150))
 #				pygame.display.update()
 #				self.disable_all_buttons()
+#				Mbox("Game Over", "Game over, you LOST! Close the button window to exit the game.", 0)
 	
 	def disable_all_buttons(self):
 		size = self.enemyBoard.size
@@ -265,8 +335,8 @@ if __name__ == "__main__":
 	#=============
 	playerBoard.draw_board(DISPLAYSURFACE, BLACK, BLUE)
 	enemyBoard.draw_board(DISPLAYSURFACE, BLACK, BLUE)
-	playerShip.draw_ships(DISPLAYSURFACE, GREY)
-	enemyShip.draw_ships(DISPLAYSURFACE, GREY)
+	playerShip.draw_ships(DISPLAYSURFACE, BLACK)
+	enemyShip.draw_ships(DISPLAYSURFACE, BLACK)
 	if (turn == 1):
 		enemyMissiles.fire_missile(0, 0, 0, DISPLAYSURFACE, playerBoard, playerShip, playerMissiles, turn)
 		turn = 0
